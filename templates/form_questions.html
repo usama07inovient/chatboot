@@ -1,0 +1,30 @@
+<div class="custom-modal-content">
+    <div class="custom-modal-header">
+        <h2>{{ form.title }}</h2>
+        <span class="custom-modal-close">&times;</span>
+    </div>
+    <div class="custom-modal-body">
+        <form id="question-form" method="post">
+            <!-- Scrollable form content -->
+            <div id="form-questions">
+                <!-- Django template for form questions -->
+                {% csrf_token %}
+                {% for question in form.questions.all %}
+                <div class="question">
+                    <label>{{ question.text }}</label>
+                    <div>
+                        <select name="question_{{ question.id }}" class="custom-select">
+                            <option value="">Select Answer</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+    <div class="custom-modal-footer">
+        <button type="button" form="question-form" id="submit-form" class="custom-modal-submit-btn">Submit</button>
+    </div>
+</div>

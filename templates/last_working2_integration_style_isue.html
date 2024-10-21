@@ -1,0 +1,715 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token }}" />
+    <title>Chatbot</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="{% static 'css/all.min.css' %}" />
+
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        #chatbot-button {
+            position: fixed;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        #rag-chatbot-container {
+            position: fixed;
+            bottom: 100px; /* Adjusted to raise the container higher */
+            right: 20px;
+            width: 100%;
+            max-width: 400px;
+            height: 70%;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            display: none; /* Set to none by default */
+        }
+        
+        .chatbot-header {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 5px 5px 5px 15px;
+            position: relative;
+            display: flex;
+        }
+        
+        .close-button {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .chatbot-body {
+            height: calc(100% - 50px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chatbot-input {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #4caf50;
+            margin-bottom: 7px;
+        }
+        
+        #rag-chatbot-input {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        
+        #rag-chatbot-input:focus-visible {
+            outline: none;
+        }
+        
+        #rag-chatbot-submit {
+            border: none;
+            background-color: #4caf50;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        .chatbot-message {
+            max-width: 100%; /* Allow the bubble to expand fully but remain within the container */
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: inline-block;
+            word-wrap: break-word; /* Ensure long text wraps within the bubble */
+            overflow-wrap: break-word; /* Ensures long words break to the next line */
+        }
+        
+        .chatbot-message.user {
+            background-color: #e9f5e8;
+            color: #000;
+            align-self: flex-end;
+            text-align: right;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 15px;
+            word-wrap: break-word; /* Wrap long words */
+        }
+        
+        .chatbot-message.bot {
+            color: #fff;
+            align-self: flex-start;
+            text-align: left;
+            font-size: 14px;
+            position: relative;
+            padding: 10px;
+            border-radius: 15px;
+            display: flex;
+            align-items: flex-end;
+            max-width: 100%; /* Allow the bubble to expand fully */
+            word-wrap: break-word; /* Wrap long words */
+        }
+        
+        .chatbot-message.bot .chat-bubble {
+            background-color: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            position: relative;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+            display: flex;
+            align-items: flex-end;
+            margin-left: 60px;
+            max-width: 100%; /* Allow full width */
+            word-wrap: break-word; /* Wrap long words */
+            overflow-wrap: break-word; /* Ensures long words break to the next line */
+        }
+        
+        /* Ensure the chat-messages container allows overflow and handles scrolling */
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            word-wrap: break-word; /* Wrap long words */
+            max-height: 100%;
+        }
+        
+        #chatbot-button-container {
+            display: flex;
+            align-items: center;
+            position: fixed;
+            bottom: 25px;
+            right: 90px;
+            background-color: #28a745;
+            padding: 4px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            overflow: hidden;
+            max-width: 0;
+            transition: max-width 0.5s ease-in-out, padding-right 0.5s ease-in-out;
+            z-index: 1; /* Ensure the container is below the button */
+        }
+        
+        #chatbot-button-container:not(.animated):hover {
+            max-width: 600px;
+            padding-right: 25px;
+            transition-delay: 0s; /* Ensuring transitions apply immediately on hover */
+        }
+        
+        #chatbot-button-container:hover {
+            max-width: 200px; /* Expands on hover */
+            padding-right: 25px;
+        }
+        
+        #chatbot-button-container span {
+            white-space: nowrap;
+            font-size: 14px;
+            color: white;
+            margin-right: 10px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 2; /* Ensure the text is on top of the button */
+        }
+        
+        #chatbot-button-container:hover span {
+            opacity: 1;
+            transition-delay: 0.5s;
+        }
+        
+        #chatbot-button {
+            border-radius: 50%;
+            padding: 15px 20px;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3; /* Ensure the button is on top of everything */
+        }
+        
+        #chatbot-button img {
+            width: 50px;
+            height: 50px;
+            transition: transform 2s ease;
+        }
+        
+        #chatbot-button:hover img {
+            transform: rotate(360deg);
+        }
+        
+        #chatbot-button:hover img {
+            transform: rotate(360deg); /* Smooth rotation effect */
+        }
+        
+        .loading span {
+            opacity: 0;
+            display: inline-block;
+            font-size: 44px !important;
+            margin: 0 2px;
+            animation: typing 1s infinite;
+            background-color: #969393;
+            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes typing {
+            0%,
+            100% {
+                opacity: 0;
+            }
+            33% {
+                opacity: 1;
+            }
+            66% {
+                opacity: 0;
+            }
+        }
+        
+        .loading span:nth-child(1) {
+            animation-delay: 0s;
+        }
+        
+        .loading span:nth-child(2) {
+            animation-delay: 0.33s;
+        }
+        
+        .loading span:nth-child(3) {
+            animation-delay: 0.66s;
+        }
+        
+        @media (max-width: 600px) {
+            #rag-chatbot-container {
+                max-width: 90%;
+                height: 85%;
+                bottom: 100px; /* Adjusted for smaller screens */
+            }
+            #chatbot-button-container {
+                right: 65px;
+                bottom: 40px; /* Slightly higher on small screens */
+            }
+        }
+        
+        @media (max-width: 320px) {
+            #rag-chatbot-container {
+                max-width: 90%;
+                height: 85%;
+                bottom: 30px; /* Closer to bottom on smallest screens */
+            }
+        
+            #chatbot-button-container {
+                right: 20px;
+                bottom: 30px;
+            }
+        
+            #chatbot-button-container span {
+                font-size: 12px;
+            }
+        }
+        
+        #suspended-message-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background-color: #f5f5f5;
+        }
+        
+        #suspended-message {
+            background-color: grey;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 80%;
+            font-size: 16px;
+        }
+        .chat-icon {
+            width: 40px;
+            height: 40px;
+            background-image: url('{{ logo }}');
+            background-repeat: no-repeat;
+            background-size: contain;
+            margin-right: 10px;
+            align-self: flex-end;
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+          }
+              
+    </style>
+  </head>
+
+  <body class="antialiased">
+    <div id="chatbot-button-container" class="animated">
+        <span id="chatbot-message">Chat with our Virtual Assistant</span>
+        <button id="chatbot-button">
+            <img src="{{ logo }}" width="50px" height="50px" style="object-fit: contain;" />
+        </button>
+    </div>
+    
+
+        <div id="rag-chatbot-container">
+            <div class="chatbot-header">
+                <img src="{{logo}}" width="50px" height="50px" style="object-fit: contain;" />
+                <h3 style="font-size: 15px;"> {{chatbot.name}} </h3>
+                <button class="close-button" id="close-chatbot">×</button>
+            </div>
+        
+            {% if suspended_message %}
+            <div id="suspended-message-wrapper">
+                <div id="suspended-message">
+                    {{ suspended_message }}
+                </div>
+            </div>
+            {% else %}
+            <div class="chatbot-body">
+                <div id="rag-chatbot-messages" class="chatbot-messages">
+                    <!-- Load chat history using Django template syntax -->
+                    {% for message in chat_history %}
+                        <!-- Check if the message is from the bot -->
+                        {% if message.role == "assistant" %}
+                            <div class="chatbot-message bot">
+                                <div class="chat-icon" ></div>
+                                <div class="chat-bubble">{{ message.content|linebreaksbr }}</div>
+                            </div>
+                        {% else %}
+                            <!-- If it's a user message -->
+                            <div class="chatbot-message user">
+                                <div class="chat-bubble">{{ message.content|linebreaksbr }}</div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+        
+                <div class="chatbot-input">
+                    <input type="text" id="rag-chatbot-input" name="question" placeholder="Ask me anything..." />
+                    <button id="rag-chatbot-submit">
+                        <img src="{% static 'images/send.png' %}" />
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        <!-- Include the RxJS library -->
+        <script src="https://unpkg.com/rxjs@7.4.0/dist/bundles/rxjs.umd.min.js"></script>
+        <!-- Link JavaScript -->
+        <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+        <script>
+            const { fromEvent } = rxjs;
+            const { map } = rxjs.operators;
+            document.getElementById('close-chatbot').addEventListener('click', function () {
+                var chatbotContainer = document.getElementById('rag-chatbot-container');
+                chatbotContainer.style.display = 'none'; // Hide the chatbot
+                //resetChat();  // Optional: Reset chat history on close
+            });
+        
+            let messageCount = 0; // Track the number of messages
+            let formLoaded = false; // Ensure the form is only shown once
+            let randomMessageCount = Math.floor(Math.random() * (7 - 4 + 1)) + 4; // Random number between 4 and 7
+            let question_asked = 0; // Track the number of questions asked
+            let form = {};
+            let userAnswers = []; // Store user responses
+        
+            let messageHistory = [];  // Array to store the last 10 messages
+        
+            function updateMessageHistory(role, message) {
+                // Add a new message to the history
+                messageHistory.push({ role: role, content: message });
+        
+                // Limit the array to 10 messages
+                if (messageHistory.length > 10) {
+                    messageHistory.shift();  // Remove the oldest message
+                }
+                console.log(messageHistory, "messageHistory");
+            }
+        
+        
+            function appendBotMessage(botMessage, botMessageDiv, isHtml = false) {
+                console.log(botMessage, "botMessage");
+                if (isHtml) {
+                    botMessageDiv.querySelector('.chat-bubble').innerHTML = botMessage; // Use innerHTML to display HTML content
+                } else {
+                    const formattedMessage = botMessage.replace(/\n/g, '<br>');
+                    botMessageDiv.querySelector('.chat-bubble').innerHTML = formattedMessage; // Use innerHTML to handle <br> tags
+                }
+            }
+        
+        
+            let isWaitingForEmail = false; // A flag to track whether we're waiting for the user's email
+        
+            async function submitMessage() {
+                var inputField = document.getElementById('rag-chatbot-input');
+                var userMessage = inputField.value;
+                var submitButton = document.getElementById('rag-chatbot-submit');
+        
+                if (userMessage) {
+                    var messageContainer = document.getElementById('rag-chatbot-messages');
+        
+                    // Append the user's message to the chat
+                    appendUserMessage(userMessage, messageContainer);
+        
+                    // Update message history with the user's message
+                    // updateMessageHistory('user', userMessage);
+        
+                    // Clear input field and scroll to bottom
+                    inputField.value = '';
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+        
+                    // Disable input and button while waiting for the response
+                    toggleInputField(inputField, submitButton, true);
+        
+                    // Show loading dots in the bot response
+                    const botMessageDiv = showLoadingBotMessage(messageContainer);
+        
+                    // Increment message count
+                    messageCount++;
+        
+                    // Check if we need to load and ask form questions
+                    if (messageCount >= randomMessageCount && !formLoaded) {
+                        if (Object.keys(form).length === 0) {
+                            // Try to load the form
+                            try {
+                                const formResponse = await getFormDetails("{{ chatbot.platform_key }}");
+                                if (formResponse.error) {
+                                    throw new Error('Form not found');
+                                }
+                                form = formResponse;
+        
+                                // Ask the first question
+                                appendBotMessage(form.questions[question_asked].text, botMessageDiv);
+        
+                            } catch (error) {
+                                console.error("Form not found, proceeding with chatbot.");
+                                // Proceed with chatbot message
+                                sendMessageAPI(userMessage, botMessageDiv, messageContainer, inputField, submitButton);
+                                formLoaded = true;
+                                return;
+                            }
+                        } else {
+                            // Store user's answer before asking the next question
+                            userAnswers.push({ question: form.questions[question_asked].text, answer: userMessage, correct_answer: form.questions[question_asked].answer });
+        
+                            // Move to the next question
+                            question_asked++;
+        
+                            // Check if there are more questions to ask
+                            if (question_asked < form.questions.length) {
+                                // Ask next question
+                                appendBotMessage(form.questions[question_asked].text, botMessageDiv);
+                            } else {
+                                formLoaded = true;
+        
+                                // Submit answers and get the score
+                                const score = await submitAnswers(userAnswers);
+                                appendBotMessage(`You have completed the form. Your score is: ${score}%`, botMessageDiv);
+        
+                                // Handle different outcomes based on the score
+                                if (score > 80) {
+                                    appendBotMessage("<p>Great job! Here's a WhatsApp link: <a href='https://wa.me/1234567890' target='_blank'>Chat on WhatsApp</a></p>", botMessageDiv, true);
+                                } else if (score >= 50 && score <= 79) {
+                                    appendBotMessage("Please provide your email for further follow-up.", botMessageDiv);
+        
+                                    isWaitingForEmail = true;
+                                    toggleInputField(inputField, submitButton, false);
+                                    return;
+                                } else {
+                                    appendBotMessage("Thank you for your responses! Now feel free to chat with me.", botMessageDiv);
+                                }
+        
+                                toggleInputField(inputField, submitButton, false);
+                                return;
+                            }
+                        }
+        
+                        toggleInputField(inputField, submitButton, false);
+                    } else {
+                        // Send the message via Fetch API with message history
+                        sendMessageAPI(userMessage, botMessageDiv, messageContainer, inputField, submitButton, messageHistory);
+                    }
+                }
+            }
+        
+        
+            function toggleInputField(inputField, submitButton, isDisabled) {
+                inputField.disabled = isDisabled;
+                submitButton.disabled = isDisabled;
+                if (!isDisabled) {
+                    inputField.focus(); // Focus on the input field when it's enabled
+                }
+            }
+        
+            function appendUserMessage(userMessage, messageContainer) {
+                var userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'chatbot-message user';
+                userMessageDiv.textContent = userMessage;
+                messageContainer.appendChild(userMessageDiv);
+            }
+        
+            function showLoadingBotMessage(messageContainer) {
+                var botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'chatbot-message bot';
+        
+                var chatIconDiv = document.createElement('div');
+                chatIconDiv.className = 'chat-icon';
+                chatIconDiv.style.backgroundImage = "url('{{logo}}')";
+                chatIconDiv.style.backgroundSize = "contain";
+                chatIconDiv.style.backgroundRepeat = "no-repeat";
+        
+                var chatBubbleDiv = document.createElement('div');
+                chatBubbleDiv.className = 'chat-bubble loading';
+                chatBubbleDiv.innerHTML = '<span></span><span></span><span></span>'; // Loading dots
+        
+                botMessageDiv.appendChild(chatIconDiv);
+                botMessageDiv.appendChild(chatBubbleDiv);
+                messageContainer.appendChild(botMessageDiv);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+        
+                return botMessageDiv;
+            }
+        
+            function readBotResponse(reader, botMessageDiv, messageContainer, inputField, submitButton) {
+                const decoder = new TextDecoder();
+                let botResponse = '';
+        
+                function readChunk({ done, value }) {
+                    if (done) {
+                        // Once done, save the complete assistant message to the history
+                        updateMessageHistory('assistant', botResponse);
+                        toggleInputField(inputField, submitButton, false);
+                        inputField.focus(); // Automatically select the input field
+                        return;
+                    }
+        
+                    // Process the chunk
+                    const chunk = decoder.decode(value, { stream: true });
+                    botResponse += chunk;
+        
+                    // Update the bot message with the actual response
+                    appendBotMessage(botResponse, botMessageDiv);
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+        
+                    return reader.read().then(readChunk);
+                }
+        
+                reader.read().then(readChunk);
+            }
+        
+            function sendMessageAPI(userMessage, botMessageDiv, messageContainer, inputField, submitButton, messageHistory) {
+                console.log(messageHistory, "messageHistory");
+        
+                fetch('/chatbot/send_message/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}', // Django's CSRF token
+                    },
+                    body: JSON.stringify({
+                        platform_key: '{{ chatbot.platform_key }}',
+                        username: '{{ username }}',
+                        email: '{{ email }}',
+                        message: userMessage,
+                        message_history: messageHistory,  // Send the last 10 messages as an array
+                    }),
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // If the response is not OK, handle the error message
+                        return response.json().then(errorData => {
+                            console.error('Error from server:', errorData.error);
+                            appendBotMessage(errorData.message || "An error occurred. Please try again.", botMessageDiv);
+                            messageContainer.scrollTop = messageContainer.scrollHeight;
+                            toggleInputField(inputField, submitButton, false);
+                            //throw new Error(errorData.error);  // Throw the error for further handling
+                        });
+                    }
+        
+                    // If the response is OK, proceed with reading the response
+                    updateMessageHistory('user', userMessage);
+                    const reader = response.body.getReader();
+                    readBotResponse(reader, botMessageDiv, messageContainer, inputField, submitButton);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    appendBotMessage("An unexpected error occurred. Please try again.", botMessageDiv);
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+                    toggleInputField(inputField, submitButton, false);
+                });
+            }
+        
+            function scrollToBottom() {
+                var messageContainer = document.getElementById('rag-chatbot-messages');
+                messageContainer.scrollTo({
+                    top: messageContainer.scrollHeight - messageContainer.clientHeight,  // Scroll to the last message
+                    behavior: 'smooth'  // Add smooth scrolling for a nicer effect
+                });
+            }
+        
+            document.getElementById('chatbot-button').addEventListener('click', function () {
+                var chatbotContainer = document.getElementById('rag-chatbot-container');
+                if (chatbotContainer.style.display === 'none' || chatbotContainer.style.display === '') {
+                    chatbotContainer.style.display = 'block';  // Show the chatbot
+                    scrollToBottom();  // Scroll to the last message when the chat is opened
+                } else {
+                    chatbotContainer.style.display = 'none';  // Hide the chatbot
+                }
+            });
+        
+            document.addEventListener('DOMContentLoaded', function () {
+                var chatbotContainer = document.getElementById('rag-chatbot-container');
+                chatbotContainer.style.display = 'none';  // Set to none on page load
+                scrollToBottom();  // Ensure it scrolls to the bottom after loading
+            });
+        
+            document.getElementById('rag-chatbot-input').addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    submitMessage(); // Send the message on Enter key press
+                }
+            });
+        
+            document.getElementById('rag-chatbot-submit').addEventListener('click', submitMessage);
+        
+            function resetChat() {
+                var messageContainer = document.getElementById('rag-chatbot-messages');
+                messageContainer.innerHTML = ''; // Clear the chat history
+            }
+        
+            function getFormDetails(platform_key) {
+                const url = `/chatbot/form/${platform_key}/`;  // Replace with the correct endpoint
+                return fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error fetching form data.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log(data, "data");
+                    return data;  // Return the form data
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    return { error: error.message };
+                });
+            }
+        
+            async function submitAnswers(questions_replies) {
+                try {
+                    const response = await fetch('/chatbot/api/evaluate-interest/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ questions_replies })  // Send collected question-answer pairs as 'questions_replies'
+                    });
+        
+                    const result = await response.json();
+        
+                    if (response.ok) {
+                        return result.overall_score;  // Return the full result (including individual scores and overall score)
+                    } else {
+                        console.error('Error from API:', result.error);
+                        return { score: 0, error: result.error };  // Return 0 score if there's an error
+                    }
+        
+                } catch (error) {
+                    console.error('Error submitting answers:', error);
+                    return { score: 0, error: error.message };  // Return 0 score on network or other errors
+                }
+            }
+        </script>
+  </body>
+</html>

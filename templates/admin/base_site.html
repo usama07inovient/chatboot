@@ -1,0 +1,222 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block branding %}
+<style>
+    html[data-theme="dark"] {
+        --primary: #339933; /* Changed */
+        --primary-fg: #f7f7f7;
+        --body-fg: #eeeeee;
+        --body-bg: #121212;
+        --body-quiet-color: #d0d0d0;
+        --body-medium-color: #e0e0e0;
+        --body-loud-color: #ffffff;
+        --breadcrumbs-link-fg: #e0e0e0;
+        --breadcrumbs-bg: var(--primary);
+        /* --link-fg: #66cc66; Corresponding green shade */
+        --link-fg: #ffffff; 
+        --link-hover-color: #47b247; /* Corresponding green shade */
+        --link-selected-fg: #339933; /* Same primary green */
+        --hairline-color: #272727;
+        --border-color: #353535;
+        --error-fg: #e35f5f;
+        --message-success-bg: #006b1b;
+        --message-warning-bg: #583305;
+        --message-error-bg: #570808;
+        --darkened-bg: #212121;
+        --selected-bg: #1b1b1b;
+        --selected-row: #005f39; /* Dark green shade */
+        --close-button-bg: #333333;
+        --close-button-hover-bg: #666666;
+        color-scheme: dark;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --primary: #339933; /* Changed */
+            --primary-fg: #f7f7f7;
+            --body-fg: #eeeeee;
+            --body-bg: #121212;
+            --body-quiet-color: #d0d0d0;
+            --body-medium-color: #e0e0e0;
+            --body-loud-color: #ffffff;
+            --breadcrumbs-link-fg: #e0e0e0;
+            --breadcrumbs-bg: var(--primary);
+            /* --link-fg: #66cc66; Corresponding green shade */
+            --link-fg: #000000;
+            --link-hover-color: #47b247; /* Corresponding green shade */
+            --link-selected-fg: #339933; /* Same primary green */
+            --hairline-color: #272727;
+            --border-color: #353535;
+            --error-fg: #e35f5f;
+            --message-success-bg: #006b1b;
+            --message-warning-bg: #583305;
+            --message-error-bg: #570808;
+            --darkened-bg: #212121;
+            --selected-bg: #1b1b1b;
+            --selected-row: #005f39; /* Dark green shade */
+            --close-button-bg: #333333;
+            --close-button-hover-bg: #666666;
+            color-scheme: dark;
+        }
+    }
+    html[data-theme="light"], :root {
+        --primary: #339933; /* Changed */
+        --secondary: #206620; /* Darker green */
+        /* --accent: #99cc66; Green accent */
+        --accent: #ffffff;
+        --primary-fg: #fff;
+        --body-fg: #333;
+        --body-bg: #fff;
+        --body-quiet-color: #666;
+        --body-medium-color: #444;
+        --body-loud-color: #000;
+        /* --header-color: #ffc; */
+        --header-color: #ffffff;
+        --header-branding-color: var(--accent);
+        --header-bg: var(--secondary);
+        --header-link-color: var(--primary-fg);
+        --breadcrumbs-fg: #c4e8c4; /* Light green */
+        --breadcrumbs-link-fg: var(--body-bg);
+        --breadcrumbs-bg: #339933; /* Changed */
+        /* --link-fg: #339933; Same primary green */
+        --link-fg: #000000;
+        --link-hover-color: #247824; /* Darker green */
+        --link-selected-fg: var(--secondary);
+        --hairline-color: #e8e8e8;
+        --border-color: #ccc;
+        --error-fg: #ba2121;
+        --message-success-bg: #dfd;
+        --message-warning-bg: #ffc;
+        --message-error-bg: #ffefef;
+        --darkened-bg: #f8f8f8;
+        --selected-bg: #e4e4e4;
+        --selected-row: #ccffcc; /* Light green */
+        --button-fg: #fff;
+        --button-bg: var(--secondary);
+        --button-hover-bg: #205067;
+        --default-button-bg: #205067;
+        --default-button-hover-bg: var(--secondary);
+        --close-button-bg: #747474;
+        --close-button-hover-bg: #333;
+        --delete-button-bg: #ba2121;
+        --delete-button-hover-bg: #a41515;
+        --object-tools-fg: var(--button-fg);
+        --object-tools-bg: var(--close-button-bg);
+        --object-tools-hover-bg: var(--close-button-hover-bg);
+        --font-family-primary: "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        --font-family-monospace: ui-monospace, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro", "Fira Mono", "Droid Sans Mono", "Courier New", monospace, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        color-scheme: light;
+    }
+    
+</style>
+
+
+
+<style>
+    /* Custom styles for branding */
+    #site-name a {
+        font-family: 'Poppins', sans-serif;
+        font-size: 28px;
+        color: #f5f5f5;
+        text-decoration: none;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    #site-name a:hover {
+        color: #ffe600;
+    }
+
+    /* Customize admin header background */
+    .module h1 {
+        background: #333;
+        color: #ffe600;
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    /* Fancy logo styling */
+    #site-name a:before {
+        content: '';
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        margin-right: 10px;
+        background-image: url('{% static 'logo.png' %}'); /* Replace with the actual image URL */
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+    
+</style>
+
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">Admin Panel</a>
+</h1>
+{% endblock %}
+
+{% block userlinks %}
+<style>
+    /* Style for the user tools (logout, change password links) */
+    #user-tools {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    #user-tools li {
+        margin-left: 15px;
+        display: inline-block;
+    }
+
+    #user-tools a {
+        color: #f5f5f5;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 5px;
+        background-color: #444;
+        transition: background-color 0.3s ease;
+    }
+
+    #user-tools a:hover {
+        background-color: #ffe600;
+        color: #333;
+    }
+</style>
+
+<ul id="user-tools">
+    <li><a href="{% url 'admin:password_change' %}">Change password</a></li>
+<li>
+    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        Log out
+    </a>
+    <form id="logout-form" method="post" action="{% url 'admin:logout' %}" style="display: none;">
+        {% csrf_token %}
+    </form>
+</li>
+
+
+
+    <li>
+    <button class="theme-toggle">
+      <span class="visually-hidden theme-label-when-auto">Toggle theme (current theme: auto)</span>
+      <span class="visually-hidden theme-label-when-light">Toggle theme (current theme: light)</span>
+      <span class="visually-hidden theme-label-when-dark">Toggle theme (current theme: dark)</span>
+      <svg aria-hidden="true" class="theme-icon-when-auto">
+        <use xlink:href="#icon-auto"></use>
+      </svg>
+      <svg aria-hidden="true" class="theme-icon-when-dark">
+        <use xlink:href="#icon-moon"></use>
+      </svg>
+      <svg aria-hidden="true" class="theme-icon-when-light">
+        <use xlink:href="#icon-sun"></use>
+      </svg>
+    </button>
+  </li>
+</ul>
+{% endblock %}

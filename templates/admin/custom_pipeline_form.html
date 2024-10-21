@@ -1,0 +1,38 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+
+{% block content %}
+  <h1>{% if adminform.instance.pk %}Update{% else %}Add{% endif %} DataPipeline: {{ adminform.instance.name }}</h1>
+
+  <!-- Form for displaying the fields in DataPipeline and DataSource -->
+  <form method="post" enctype="multipart/form-data">  <!-- This is required for file uploads -->
+    {% csrf_token %}
+
+    <!-- Render the fields from the DataPipeline -->
+    <div>
+      {{ adminform.as_p }}  <!-- This will render all fields from the form -->
+    </div>
+
+    <!-- Render the inline DataSource form -->
+    {% if inline_admin_formsets %}
+      {% for inline_admin_formset in inline_admin_formsets %}
+        <h2>{{ inline_admin_formset.opts.verbose_name }}</h2>
+        {{ inline_admin_formset.management_form }}
+        <table>
+          {% for inline_form in inline_admin_formset.forms %}
+            <tr>
+              {{ inline_form.as_p }}  <!-- Render the inline form, including file fields -->
+            </tr>
+          {% endfor %}
+        </table>
+
+        <!-- Add button for adding new DataSource rows -->
+        <a href="#" class="add-row" onclick="addForm(this, '{{ inline_admin_formset.prefix }}'); return false;">Add another DataSource</a>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Submit button -->
+    <button type="submit" class="btn btn-primary">Save</button>
+  </form>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+/* Align the label for custom_permissions similar to groups */
+.aligned-widget {
+    display: block;
+    width: 100%;
+}
+
+.field-box label[for="id_custom_permissions"] {
+    float: left;
+    width: 15%;  /* Adjust this percentage as necessary for alignment */
+    margin-right: 10px;
+    text-align: right;  /* Align the text to the right */
+}
+
+.field-box #id_custom_permissions {
+    display: inline-block;
+    width: 80%;  /* Adjust as necessary */
+}
+
+/* Ensure the label is aligned with the Custom App Permissions widget */
+.custom-permissions-widget {
+    display: inline-block;
+    width: 80%;  /* Adjust width to suit your layout */
+}
+
+.field-box label[for="id_custom_permissions"] {
+    display: inline-block;
+    width: 15%;  /* Adjust the width to align with the widget */
+    margin-right: 10px;
+    text-align: left;
+}
+
+/* Change the background color of the admin panel */
+body {
+    background-color: #2c3e50;
+}
+
+/* Change the color of the admin navigation bar */
+.nav-sidebar {
+    background-color: #34495e;
+}
+
+/* Change the color of the header */
+#header {
+    background-color: #04221c !important;
+}
+
+/* Change text color */
+h1, h2, h3, h4, h5, h6 {
+    color: #ecf0f1;
+}

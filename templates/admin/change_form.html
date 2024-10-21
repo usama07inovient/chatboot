@@ -1,0 +1,17 @@
+{% extends "admin/change_form.html" %}
+
+{% block after_field_sets %}
+    {{ block.super }}
+
+    {% if adminform.form.custom_permissions %}
+        <fieldset class="module aligned">
+            <h2>Custom App Permissions</h2>
+            <div class="form-row field-custom_permissions">
+                {% comment %} {{ adminform.form.custom_permissions.label_tag }} {% endcomment %}
+                <div class="field-box">
+                    {{ adminform.form.custom_permissions }}
+                </div>
+            </div>
+        </fieldset>
+    {% endif %}
+{% endblock %}

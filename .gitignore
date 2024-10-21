@@ -1,0 +1,17 @@
+__pycache__/
+migrations/
+.env
+gittoken.txt
+db.sqlite3
+chatboot_serverkey.pem
+addtional_features.txt
+next.txt
+recomendations.txt
+tasks.txt
+testing.txt
+errors.txt
+venv
+media
+ReadMe2.md
+readme.md
+lastworing_*

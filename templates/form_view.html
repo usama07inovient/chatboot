@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ form.title }}</title>
+</head>
+<body>
+    <h1>{{ form.title }}</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        <ul>
+            {% for question in form.questions.all %}
+                <li>
+                    <label>{{ question.text }}</label>
+                    <div>
+                        <label>
+                            <input type="radio" name="question_{{ question.id }}" value="yes" required>
+                            Yes
+                        </label>
+                        <label>
+                            <input type="radio" name="question_{{ question.id }}" value="no">
+                            No
+                        </label>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if score is not None %}
+        <h2>Your score: {{ score }} out of {{ total_questions }}</h2>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,147 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+    {{ block.super }}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          var formGroup = document.querySelector("#form-group");
+          if (formGroup) {
+            // Append the add chatbot button after the inline table
+            var addButton = document.createElement('div');
+            addButton.innerHTML = `<br> {{ add_form_button|safe }}`;
+            formGroup.appendChild(addButton);
+          }
+    
+    
+    
+          var pipelineGroup = document.querySelector("#data_pipeline-group");
+          if (pipelineGroup) {
+            // Append the add chatbot button after the inline table
+            var addButton = document.createElement('div');
+            addButton.innerHTML = `<br> {{ add_pipeline_button|safe }}`;
+            pipelineGroup.appendChild(addButton);
+          }
+        });
+      </script>
+      
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed.");  // To check if the script is running
+
+            // Find the existing checkboxes by ID
+            var isActiveCheckbox = document.querySelector("#is-active-toggle");
+            var saveSessionCheckbox = document.querySelector("#save-session-toggle");
+
+            console.log("isActiveCheckbox found:", isActiveCheckbox); // Check if the element is being found
+            console.log("saveSessionCheckbox found:", saveSessionCheckbox); // Check if the element is being found
+
+            // Append custom toggles for Is Active
+            if (isActiveCheckbox) {
+                var label = isActiveCheckbox.parentNode.querySelector("label");
+                isActiveCheckbox.style.display = 'none';  // Hide the original checkbox
+                label.innerHTML= `
+                    <div class="toggle-wrapper-dynamic">
+                        <label for="is-active-toggle-dynamic">Is Active</label>
+                        <label class="toggle-switch-dynamic">
+                            <input type="checkbox" class="toggle-checkbox-dynamic" id="is-active-toggle-dynamic" ${isActiveCheckbox.checked ? 'checked' : ''}>
+                            <span class="slider-dynamic"></span>
+                        </label>
+                    </div>
+                `;
+            }
+
+            // Append custom toggles for Save User Chat Session
+            if (saveSessionCheckbox) {
+                var label = saveSessionCheckbox.parentNode.querySelector("label");
+                saveSessionCheckbox.style.display = 'none';  // Hide the original checkbox
+                label.innerHTML=''
+                label.innerHTML= `
+                    <div class="toggle-wrapper-dynamic">
+                        <label for="save-session-toggle-dynamic">Save User Chat Session</label>
+                        <label class="toggle-switch-dynamic">
+                            <input type="checkbox" class="toggle-checkbox-dynamic" id="save-session-toggle-dynamic" ${saveSessionCheckbox.checked ? 'checked' : ''}>
+                            <span class="slider-dynamic"></span>
+                        </label>
+                    </div>
+                `;
+            }
+
+            // Use event delegation to handle changes to dynamically created checkboxes
+            document.addEventListener("change", function (event) {
+                if (event.target && event.target.id === "is-active-toggle-dynamic") {
+                    console.log("Is Active toggle changed: " + (event.target.checked ? 'ON' : 'OFF')); // Log the change
+                    isActiveCheckbox.checked = event.target.checked; // Sync with the original checkbox
+                }
+                if (event.target && event.target.id === "save-session-toggle-dynamic") {
+                    console.log("Save User Chat Session toggle changed: " + (event.target.checked ? 'ON' : 'OFF')); // Log the change
+                    saveSessionCheckbox.checked = event.target.checked; // Sync with the original checkbox
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .toggle-wrapper-dynamic {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%; /* Ensure full width */
+            margin: 10px 0;
+        }
+
+        .toggle-checkbox-dynamic {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+        }
+
+        .toggle-switch-dynamic {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 30px;
+            min-width: 50px !important;
+        }
+
+        .toggle-switch-dynamic input {
+            display: none;
+        }
+
+        .slider-dynamic {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider-dynamic:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider-dynamic {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider-dynamic:before {
+            transform: translateX(26px);
+        }
+
+        label {
+            margin-right: 20px; /* Adds space between the label and the toggle */
+        }
+    </style>
+{% endblock %}

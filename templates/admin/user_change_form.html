@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+  {{ block.super }}
+
+  <!-- Find the chatbots div and inject the Add Chatbot button -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var chatbotsGroup = document.querySelector("#chatbots-group");
+      if (chatbotsGroup) {
+        // Append the add chatbot button after the inline table
+        var addButton = document.createElement('div');
+        addButton.innerHTML = `<br> {{ add_chatbot_button|safe }}`;
+        chatbotsGroup.appendChild(addButton);
+      }
+    });
+  </script>
+{% endblock %}
